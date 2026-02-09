@@ -43,14 +43,45 @@
             const { data, error } = await client.from(storeName).upsert(payload, { returning: 'minimal' });
             if (error) {
                 console.error(`Supabase upsert error for table '${storeName}':`, error);
-                // Throw so callers (e.g. pushAllStores) can react and show user-visible errors
+                // Try fallback strategies for common schema/name mismatches below
+                // Throw into outer catch to handle fallback
                 throw error;
             }
             console.info(`Synced ${payload.length} items to Supabase table '${storeName}'.`);
             return { data, error: null };
         } catch (err) {
             console.error(`Sync failed for '${storeName}':`, err);
-            throw err;
+
+            // Fallback 1: try lowercased table name with snake_case keys
+            try {
+                const tableLower = String(storeName).toLowerCase();
+
+                function camelToSnake(str) {
+                    return str.replace(/([a-z0-9])([A-Z])/g, '$1_$2').toLowerCase();
+                }
+
+                const altPayload = payload.map(item => {
+                    const o = {};
+                    for (const k of Object.keys(item)) {
+                        // keep `id` as-is
+                        if (k === 'id') { o[k] = item[k]; continue; }
+                        o[camelToSnake(k)] = item[k];
+                    }
+                    return o;
+                });
+
+                console.info(`Attempting fallback sync to '${tableLower}' with snake_case keys.`);
+                const { data: data2, error: error2 } = await client.from(tableLower).upsert(altPayload, { returning: 'minimal' });
+                if (error2) {
+                    console.error(`Fallback upsert error for table '${tableLower}':`, error2);
+                    throw error2;
+                }
+                console.info(`Fallback synced ${altPayload.length} items to Supabase table '${tableLower}'.`);
+                return { data: data2, error: null };
+            } catch (err2) {
+                console.error(`All sync attempts failed for '${storeName}':`, err2);
+                throw err2;
+            }
         }
     }
 
