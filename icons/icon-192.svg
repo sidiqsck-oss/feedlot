@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366f1"/>
+      <stop offset="100%" style="stop-color:#4f46e5"/>
+    </linearGradient>
+  </defs>
+  <rect width="192" height="192" rx="38" fill="url(#bg)"/>
+  <g transform="translate(32, 40)" fill="#ffffff">
+    <!-- Cow head silhouette -->
+    <ellipse cx="64" cy="50" rx="45" ry="35"/>
+    <ellipse cx="25" cy="25" rx="18" ry="22"/>
+    <ellipse cx="103" cy="25" rx="18" ry="22"/>
+    <!-- Eyes -->
+    <circle cx="45" cy="45" r="6" fill="#4f46e5"/>
+    <circle cx="83" cy="45" r="6" fill="#4f46e5"/>
+    <!-- Nose -->
+    <ellipse cx="64" cy="70" rx="20" ry="15" fill="#f0f0f0"/>
+    <circle cx="55" cy="70" r="4" fill="#4f46e5"/>
+    <circle cx="73" cy="70" r="4" fill="#4f46e5"/>
+  </g>
+  <!-- Scale indicator -->
+  <rect x="55" y="130" width="82" height="35" rx="8" fill="#10b981"/>
+  <text x="96" y="154" font-family="Arial" font-size="18" font-weight="bold" fill="white" text-anchor="middle">KG</text>
+</svg>
