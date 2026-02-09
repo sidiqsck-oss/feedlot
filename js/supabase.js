@@ -31,14 +31,27 @@
         if (!client) throw new Error('Supabase client not configured');
         if (typeof getAllItems !== 'function') throw new Error('Local database helpers not available');
         const items = await getAllItems(storeName);
-        if (!items || items.length === 0) return { data: [], error: null };
+        if (!items || items.length === 0) {
+            console.info(`No items to sync for store: ${storeName}`);
+            return { data: [], error: null };
+        }
 
         // Ensure items have an `id` field for upsert behavior
         const payload = items.map(i => ({ ...i }));
 
-        const { data, error } = await client.from(storeName).upsert(payload, { returning: 'minimal' });
-        if (error) console.error('Supabase upsert error', error);
-        return { data, error };
+        try {
+            const { data, error } = await client.from(storeName).upsert(payload, { returning: 'minimal' });
+            if (error) {
+                console.error(`Supabase upsert error for table '${storeName}':`, error);
+                // Throw so callers (e.g. pushAllStores) can react and show user-visible errors
+                throw error;
+            }
+            console.info(`Synced ${payload.length} items to Supabase table '${storeName}'.`);
+            return { data, error: null };
+        } catch (err) {
+            console.error(`Sync failed for '${storeName}':`, err);
+            throw err;
+        }
     }
 
     // Pull all rows from Supabase table into local IndexedDB (clears local store first)
